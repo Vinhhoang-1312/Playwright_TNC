@@ -1,0 +1,48 @@
+dist/
+.env
+# Playwright and test artifacts
+node_modules/
+dist/
+reports/
+reports/allure-report/
+test-results/
+videos/
+screenshots/
+*.webm
+*.mp4
+*.png
+*.jpg
+*.zip
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+# Node modules and build
+node_modules/
+dist/
+
+# Env/config
+.env
+
+# Playwright & test artifacts
+playwright-report/
+test-results/
+reports/
+videos/
+screenshots/
+*.webm
+*.mp4
+*.png
+*.jpg
+*.zip
+
+# OS/Editor/IDE
+Thumbs.db
+.DS_Store
+.idea/
+.vscode/
