@@ -7,7 +7,7 @@
     "test": "playwright test",
     "test:parallel": "playwright test --workers=4",
     "allure:report": "allure generate reports/allure-results --clean -o reports/allure-report && allure open reports/allure-report",
-  "clean:artifacts": "node ./scripts/cleanArtifacts.js",
+    "clean:artifacts": "node ./scripts/cleanArtifacts.js",
     "archive:allure": "node ./ci/archiveAllure.js"
   },
   "author": "",
@@ -20,6 +20,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "openai": "^6.4.0",
     "xlsx": "^0.18.5"
   }
 }

@@ -13,7 +13,10 @@ screenshots/
 *.png
 *.jpg
 *.zip
-
+allure-report/
+reports/allure-results/
+test-results/
+playwright-report/
 # OS files
 Thumbs.db
 .DS_Store

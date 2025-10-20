@@ -5,7 +5,7 @@ export default defineConfig({
     expect: { timeout: 5000 },
     reporter: [['list'], ['html', { open: 'never' }], ['allure-playwright', { outputFolder: 'reports/allure-results' }]],
     use: {
-        baseURL: process.env.BASE_URL || 'https://www.tncstore.vn/',
+    baseURL: process.env.BASE_URL,
         trace: 'on-first-retry',
         screenshot: 'only-on-failure',
         headless: false,
