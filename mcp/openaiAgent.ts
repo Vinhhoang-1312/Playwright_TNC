@@ -1,8 +1,7 @@
 import 'dotenv/config';
 // Agent MCP AI tích hợp OpenAI cho Playwright
 import OpenAI from 'openai';
-
-import { autoFixLocator, setLocatorFixer } from './locatorAutoFixer';
+import { autoFixLocator } from './locatorAutoFixer';
 
 const openai = new OpenAI({
 	apiKey: process.env.OPENAI_API_KEY,
