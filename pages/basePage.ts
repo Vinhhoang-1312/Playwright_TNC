@@ -1,5 +1,6 @@
 import { Page } from '@playwright/test';
-import { suggestLocatorFix } from '../utils/openaiAgent';
+import { suggestLocatorFix } from '../mcp/openaiAgent';
+import { run3AgentFlow } from '../agents';
 import { PopupHandler } from '../utils/popupHandler';
 import path from 'path';
 
@@ -16,14 +17,13 @@ export class BasePage {
     /**
      * Wrapper cho mọi thao tác với locator, thử dismiss popup rồi gọi agent AI khi lỗi.
      */
-    async safeLocatorAction(action: () => Promise<any>, locator: string, locatorKey?: string) {
+    async safeLocatorAction(action: () => Promise<any>, locator: string) {
         const popupHandler = new PopupHandler(this.page);
         try {
             await popupHandler.dismissAllPopups();
             await action();
         } catch (error) {
             console.log(`[safeLocatorAction] Action failed for locator: ${locator}`);
-            // Khi thao tác fail, thử dismiss popup lần nữa
             await popupHandler.dismissAllPopups();
             // Lấy DOM và gọi AI agent
             let domHtml = '';
@@ -39,17 +39,24 @@ export class BasePage {
             }
             try {
                 console.log(`[safeLocatorAction] Calling AI agent to fix locator in file: ${this.sourceFile}`);
-                const suggestion = await suggestLocatorFix(
-                    (error as Error).message,
-                    domHtml,
-                    this.sourceFile,
-                    locator
-                );
-                console.log(`[safeLocatorAction] AI suggestion: ${suggestion}`);
-                if (suggestion && suggestion !== locator) {
-                    console.log('[safeLocatorAction] ✅ AI fixed locator. Đã sửa file, hãy chạy lại test!');
+                const enable3 = process.env.ENABLE_3AGENT === 'true';
+                if (enable3) {
+                    const evt = { testId: undefined, action: undefined, selector: locator, errorMessage: (error as Error).message, domSnapshot: domHtml };
+                    const res = await run3AgentFlow(this.page, evt, this.sourceFile, locator);
+                    console.log('[safeLocatorAction] 3-agent flow result:', res);
                 } else {
-                    console.warn('[safeLocatorAction] AI không đề xuất locator mới hoặc trùng với cũ');
+                    const suggestion = await suggestLocatorFix(
+                        (error as Error).message,
+                        domHtml,
+                        this.sourceFile,
+                        locator
+                    );
+                    console.log(`[safeLocatorAction] AI suggestion: ${suggestion}`);
+                    if (suggestion && suggestion !== locator) {
+                        console.log('[safeLocatorAction] ✅ AI fixed locator. Đã sửa file, hãy chạy lại test!');
+                    } else {
+                        console.warn('[safeLocatorAction] AI không đề xuất locator mới hoặc trùng với cũ');
+                    }
                 }
             } catch (aiErr) {
                 console.error('[safeLocatorAction] AI suggestion failed:', aiErr);

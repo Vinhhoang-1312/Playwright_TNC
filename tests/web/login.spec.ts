@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test';
 import { allure } from 'allure-playwright';
 import { LoginPage } from '../../pages/loginPage';
 import { getDataRows } from '../../utils/dataProvider';
-import { suggestLocatorFix } from '../../utils/openaiAgent';
 
 const allData = getDataRows('data/users.xlsx', 'data/sample_users.json', 'Sheet1');
 const validData = allData.filter(row => row.caseType === 'valid');
