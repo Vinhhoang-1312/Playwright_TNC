@@ -12,7 +12,7 @@ export class LoginPage extends BasePage {
         accountButton: "//a[contains(@class,'item') and contains(@class,'account')]//span[contains(@class,'hover-txt')]",
         loginPopup: "#js-form-holder",
         emailField: "//input[@id='js-login-email']",        
-        //emailField: "//input[@id='js-logihoangn-email']",        
+        // emailField: "//input[@id='js-logihoangn-email']",        
         passwordField: "//input[@id='js-login-password']",
         loginButton: "//a[@class='btn-submit']",
         logoutLink: "//a[contains(text(),'Đăng xuất') or contains(text(),'Logout')]",
@@ -49,7 +49,7 @@ export class LoginPage extends BasePage {
     }
 
     async open() {
-        await this.page.goto('/', { waitUntil: 'load' });
+        await super.open('/');
     }
 
     async isLoginSuccessful(): Promise<boolean> {

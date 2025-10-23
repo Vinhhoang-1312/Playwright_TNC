@@ -2,7 +2,6 @@ import { Page } from '@playwright/test';
 import { suggestLocatorFix } from '../mcp/openaiAgent';
 import { run3AgentFlow } from '../agents';
 import { PopupHandler } from '../utils/popupHandler';
-import path from 'path';
 
 export class BasePage {
     protected page: Page;

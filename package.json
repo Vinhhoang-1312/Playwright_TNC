@@ -6,6 +6,7 @@
   "scripts": {
     "test": "playwright test",
     "test:parallel": "playwright test --workers=4",
+  "preallure:report": "node ./scripts/preallure.js",
     "allure:report": "allure generate reports/allure-results --clean -o reports/allure-report && allure open reports/allure-report",
     "clean:artifacts": "node ./scripts/cleanArtifacts.js",
     "archive:allure": "node ./ci/archiveAllure.js"
@@ -14,6 +15,7 @@
   "license": "ISC",
   "devDependencies": {
     "@playwright/test": "^1.44.0",
+    "@types/dotenv": "^6.1.1",
     "@types/xlsx": "^0.0.35",
     "allure-playwright": "^2.0.0",
     "archiver": "^5.3.1",

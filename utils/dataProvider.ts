@@ -1,14 +1,33 @@
 import path from 'path';
 import fs from 'fs';
-import { readExcelData } from './excelHelper';
+import { readExcelData, listSheetNames, readFirstNonEmptySheet } from './excelHelper';
 export type Row = {
     [key: string]: any;
 };
-export function loadDataFromExcel(relPath: string, sheet = 'Sheet1'): Row[] {
+export function loadDataFromExcel(relPath: string, sheet?: string): Row[] {
     const filePath = path.resolve(process.cwd(), relPath);
-    if (!fs.existsSync(filePath))
-        return [];
-    return readExcelData(filePath, sheet);
+    if (!fs.existsSync(filePath)) return [];
+
+    // If caller provided a sheet name and it exists, use it
+    if (sheet) {
+        const sheets = listSheetNames(filePath);
+        if (sheets.includes(sheet)) {
+            return readExcelData(filePath, sheet);
+        }
+    }
+
+    // Try common sheet names
+    const common = ['Login', 'Register', 'UserProfile', 'Search', 'Sheet1', 'Sheet'];
+    const sheets = listSheetNames(filePath);
+    for (const name of common) {
+        if (sheets.includes(name)) {
+            return readExcelData(filePath, name);
+        }
+    }
+
+    // Fallback: read first non-empty sheet (returns rows or empty array)
+    const fallback = readFirstNonEmptySheet(filePath);
+    return fallback.rows || [];
 }
 export function loadJson(relPath: string): Row[] {
     const filePath = path.resolve(process.cwd(), relPath);
@@ -21,16 +40,13 @@ export function forEachDataRow(rows: Row[], fn: (row: Row, idx: number) => void)
         fn(row, idx);
 }
 
-export function getDataRows(excelRel: string, jsonRel: string, sheet = 'Sheet1', maxRows?: number): Row[] {
+export function getDataRows(excelRel: string, _jsonRel: string, sheet?: string, maxRows?: number): Row[] {
     const excelRows = loadDataFromExcel(excelRel, sheet);
-    // Validate that excelRows look like expected (have username/email keys)
     if (excelRows && excelRows.length > 0) {
         const first = excelRows.find(r => r && Object.keys(r).length > 0);
-        if (first && (first.username || first.email)) {
+        if (first && (first.username || first.email || first.keyword)) {
             return typeof maxRows === 'number' ? excelRows.slice(0, maxRows) : excelRows;
         }
     }
-    // fallback to JSON
-    const jsonRows = loadJson(jsonRel);
-    return typeof maxRows === 'number' ? jsonRows.slice(0, maxRows) : jsonRows;
+    return [];
 }
