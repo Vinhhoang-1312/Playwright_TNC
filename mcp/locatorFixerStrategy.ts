@@ -1,11 +1,10 @@
+import fs from 'fs';
+import path from 'path';
+
 // Interface for locator fixing strategy
 export interface LocatorFixer {
 	fixLocator(filePath: string, oldLocator: string, newLocator: string): void;
 }
-
-// Default implementation using file system
-import fs from 'fs';
-import path from 'path';
 
 export class FileLocatorFixer implements LocatorFixer {
 	private enableAutoFix: boolean;
