@@ -1,1 +1,1 @@
-{"reportName":"Allure Report","testRuns":[],"statistic":{"failed":0,"broken":0,"skipped":0,"passed":6,"unknown":0,"total":6},"time":{"start":1774059549336,"stop":1774059553138,"duration":3802,"minDuration":875,"maxDuration":1885,"sumDuration":7515}}
+{"reportName":"Playwright TNC Report","testRuns":[],"statistic":{"failed":0,"broken":0,"skipped":0,"passed":6,"unknown":0,"total":6},"time":{"start":1774060332923,"stop":1774060337518,"duration":4595,"minDuration":726,"maxDuration":2941,"sumDuration":8908}}
