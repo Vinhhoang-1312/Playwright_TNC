@@ -1,12 +1,12 @@
 import { Page } from '@playwright/test';
-import { suggestLocatorFix } from '../mcp/openaiAgent';
+import { suggestLocatorFix } from '../agents/generator';
 import { run3AgentFlow } from '../agents';
 import { PopupHandler } from '../utils/popupHandler';
 
 export class BasePage {
     protected page: Page;
     protected sourceFile: string; // Lưu file path của class con
-    
+
     constructor(page: Page) {
         this.page = page;
         // Mặc định là basePage, sẽ được override bởi class con

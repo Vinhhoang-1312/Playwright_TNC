@@ -1,0 +1,89 @@
+name: Playwright Tests - Scheduled CI
+
+on:
+  schedule:
+    # Chạy vào 9h sáng và 12h trưa (Giờ VN = UTC+7)
+    # 9h sáng VN = 2h UTC
+    # 12h trưa VN = 5h UTC
+    - cron: '0 2 * * *'
+    - cron: '0 5 * * *'
+  # Cũng có thể chạy thủ công từ GitHub UI
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run Playwright Tests & Send Report
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium browser
+        run: npx playwright install chromium --with-deps
+
+      - name: Install Allure CLI
+        run: npm install -g allure-commandline
+
+      - name: Run Playwright Tests
+        run: npx playwright test
+        continue-on-error: true
+        env:
+          BASE_URL: https://www.saucedemo.com
+
+      - name: Generate Allure Report
+        if: always()
+        run: |
+          allure generate reports/allure-results --clean -o reports/allure-report
+
+      - name: Zip Allure Report
+        if: always()
+        run: |
+          cd reports
+          zip -r allure-report-$(date +%Y%m%d_%H%M).zip allure-report/
+
+      - name: Find zipped report
+        if: always()
+        id: find-zip
+        run: echo "ZIP_FILE=$(ls reports/allure-report-*.zip | head -1)" >> $GITHUB_OUTPUT
+
+      - name: Upload Allure Report as Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: reports/allure-report/
+
+      - name: Send Email with Allure Report
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "[Playwright TNC] Test Report - ${{ github.run_number }} - ${{ job.status }}"
+          body: |
+            Xin chào Vinh,
+
+            Đây là kết quả chạy tự động test Playwright TNC ngày $(date '+%d/%m/%Y %H:%M') (Giờ VN).
+
+            📊 Trạng thái: ${{ job.status }}
+            🔗 Chi tiết: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            File báo cáo Allure được đính kèm trong email này. Mở file ZIP và truy cập index.html để xem báo cáo chi tiết có screenshot.
+
+            ----
+            Playwright TNC - Automated CI/CD
+          to: tranphanvinhhoang7@gmail.com
+          from: ${{ secrets.EMAIL_USERNAME }}
+          attachments: ${{ steps.find-zip.outputs.ZIP_FILE }}

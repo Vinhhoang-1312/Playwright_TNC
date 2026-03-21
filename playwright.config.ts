@@ -1,46 +1,30 @@
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
 dotenv.config();
+
 export default defineConfig({
     testDir: './tests',
-    timeout: 120000,
-    expect: { timeout: 5000 },
-    reporter: [['list'], ['html', { open: 'never' }], ['allure-playwright', { outputFolder: 'reports/allure-results' }]],
+    timeout: 60000,
+    expect: { timeout: 8000 },
+    reporter: [
+        ['list'],
+        ['html', { open: 'never', outputFolder: 'reports/html-report' }],
+        ['allure-playwright', { outputFolder: 'reports/allure-results', detail: true, suiteTitle: true }],
+    ],
     use: {
-    baseURL: process.env.BASE_URL,
+        baseURL: process.env.BASE_URL || 'https://www.saucedemo.com',
         trace: 'on-first-retry',
-        screenshot: 'only-on-failure',
-        headless: false,
-        video: 'off',
-        actionTimeout: 0,
-        launchOptions: {
-            args: ['--start-maximized']
-        },
-        viewport: null,
+        screenshot: 'on',          // Chụp screenshot cho TẤT CẢ test (pass & fail)
+        video: 'retain-on-failure', // Quay video khi fail
+        headless: true,
+        viewport: { width: 1280, height: 720 },
+        actionTimeout: 15000,
     },
     projects: [
         {
             name: 'chromium',
-            use: {
-                browserName: 'chromium',
-                viewport: null,
-                launchOptions: { args: ['--start-maximized'] }
-            }
+            use: { ...devices['Desktop Chrome'] },
         },
-        {
-            name: 'edge',
-            use: {
-                browserName: 'chromium',
-                channel: 'msedge',
-                viewport: null,
-                launchOptions: {
-                    args: [
-                        '--start-maximized',
-                        '--disable-features=Translate',
-                        '--lang=vi'
-                    ]
-                }
-            }
-        }
     ],
 });
+

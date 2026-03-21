@@ -4,12 +4,12 @@
   "description": "Playwright automation project",
   "main": "index.js",
   "scripts": {
-    "test": "playwright test",
-    "test:parallel": "playwright test --workers=4",
-  "preallure:report": "node ./scripts/preallure.js",
-    "allure:report": "allure generate reports/allure-results --clean -o reports/allure-report && allure open reports/allure-report",
-    "clean:artifacts": "node ./scripts/cleanArtifacts.js",
-    "archive:allure": "node ./ci/archiveAllure.js"
+    "test": "playwright test tests/web",
+    "test:parallel": "playwright test tests/web --workers=4",
+    "allure:generate": "allure generate reports/allure-results --clean -o reports/allure-report",
+    "allure:open": "allure open reports/allure-report",
+    "allure:report": "npm run allure:generate && npm run allure:open",
+    "clean": "node ./scripts/cleanArtifacts.js"
   },
   "author": "",
   "license": "ISC",
@@ -22,6 +22,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "dotenv": "^17.3.1",
     "openai": "^6.4.0",
     "xlsx": "^0.18.5"
   }
