@@ -14,6 +14,6 @@ export async function step(page: Page, name: string, action: () => Promise<void>
         await action();
         // Chụp screenshot sau mỗi step, đính vào Allure
         const screenshot = await page.screenshot({ fullPage: false });
-        await allure.attachment(`📸 ${name}`, screenshot, { contentType: 'image/png' });
+        await allure.attachment(`Screenshot: ${name}`, screenshot, { contentType: 'image/png' });
     });
 }

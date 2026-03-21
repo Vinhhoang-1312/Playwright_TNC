@@ -75,7 +75,9 @@ jobs:
 
       - name: Generate Allure Report
         if: always()
-        run: allure generate reports/allure-results --clean -o reports/allure-report
+        run: |
+          allure generate reports/allure-results --clean -o reports/allure-report
+          touch reports/allure-report/.nojekyll
 
       - name: Zip Allure Report
         if: always()
