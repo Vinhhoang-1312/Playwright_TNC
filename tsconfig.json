@@ -2,7 +2,10 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "commonjs",
-    "lib": ["ESNext", "DOM"],
+    "lib": [
+      "ESNext",
+      "DOM"
+    ],
     "outDir": "./dist",
     "rootDir": "./",
     "strict": true,
@@ -10,5 +13,8 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["tests", "pages", "fixtures", "utils", "data", "config"]
+  "include": [
+    "tests",
+    "agents"
+  ]
 }
