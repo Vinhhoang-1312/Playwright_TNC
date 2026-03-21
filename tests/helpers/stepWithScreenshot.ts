@@ -1,0 +1,19 @@
+import { Page } from '@playwright/test';
+import { allure } from 'allure-playwright';
+
+/**
+ * Helper: chụp screenshot + đính vào Allure report ở từng step.
+ * 
+ * Cách dùng:
+ *   await step(page, 'Mở trang login', async () => {
+ *       await page.goto('https://www.saucedemo.com');
+ *   });
+ */
+export async function step(page: Page, name: string, action: () => Promise<void>): Promise<void> {
+    await allure.step(name, async () => {
+        await action();
+        // Chụp screenshot sau mỗi step, đính vào Allure
+        const screenshot = await page.screenshot({ fullPage: false });
+        await allure.attachment(`📸 ${name}`, screenshot, { contentType: 'image/png' });
+    });
+}
