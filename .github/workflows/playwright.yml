@@ -21,11 +21,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  # ─── JOB 1: Full test suite (chạy theo lịch 9h & 12h, gửi email) ────────────
-  test:
+  # ─── JOB 1: Scheduled/Manual Run ───────────────────────────────────────
+  scheduled:
     name: "[Scheduled] Full Test Suite + Email Report"
     runs-on: ubuntu-latest
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
