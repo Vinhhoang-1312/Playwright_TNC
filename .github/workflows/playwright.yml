@@ -2,10 +2,12 @@ name: Playwright Tests - Scheduled CI
 
 on:
   schedule:
-    # Chạy vào 9h sáng và 12h trưa (Giờ VN = UTC+7)
-    # 9h sáng VN = 2h UTC
-    # 12h trưa VN = 5h UTC
+    # Giờ VN = UTC+7 → trừ 7h để được UTC
+    # 8h23 sáng VN = 1h23 UTC  (thêm để test CI)
+    - cron: '23 1 * * *'
+    # 9h sáng VN = 2h00 UTC
     - cron: '0 2 * * *'
+    # 12h trưa VN = 5h00 UTC
     - cron: '0 5 * * *'
   # Chạy Regression khi có push hoặc PR vào main/master
   push:
