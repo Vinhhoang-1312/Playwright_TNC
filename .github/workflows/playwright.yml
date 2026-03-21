@@ -1,5 +1,8 @@
 name: Playwright Tests - Scheduled CI
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   schedule:
     # Giờ VN = UTC+7 → trừ 7h để được UTC
@@ -93,9 +96,10 @@ jobs:
 
             ----
             Playwright TNC - Automated CI/CD
-          to: tranphanvinhhoang7@gmail.com
+          to: gamingts2019@gmail.com
           from: ${{ secrets.EMAIL_USERNAME }}
           attachments: ${{ steps.find-zip.outputs.ZIP_FILE }}
+
 
   # ─── JOB 2: Regression (chạy khi push/PR lên main/master) ───────────────────
   regression:
