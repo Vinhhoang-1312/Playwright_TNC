@@ -54,10 +54,28 @@ jobs:
         env:
           BASE_URL: https://www.saucedemo.com
 
-      - name: Generate Allure Report
+      - name: Generate Allure Environment and Executor Info
         if: always()
         run: |
-          allure generate reports/allure-results --clean -o reports/allure-report
+          mkdir -p reports/allure-results
+          echo "Browser=Chromium" > reports/allure-results/environment.properties
+          echo "Environment=Production" >> reports/allure-results/environment.properties
+          echo "Operating System=Ubuntu (GitHub Actions)" >> reports/allure-results/environment.properties
+          echo "Base URL=https://www.saucedemo.com" >> reports/allure-results/environment.properties
+          
+          echo '{
+            "name": "GitHub Actions",
+            "type": "github",
+            "reportName": "Playwright TNC Report",
+            "url": "${{ github.server_url }}/${{ github.repository }}",
+            "buildOrder": ${{ github.run_number }},
+            "buildName": "Run #${{ github.run_number }}",
+            "buildUrl": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          }' > reports/allure-results/executor.json
+
+      - name: Generate Allure Report
+        if: always()
+        run: allure generate reports/allure-results --clean -o reports/allure-report
 
       - name: Zip Allure Report
         if: always()
