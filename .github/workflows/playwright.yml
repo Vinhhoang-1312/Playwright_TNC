@@ -68,6 +68,14 @@ jobs:
         id: find-zip
         run: echo "ZIP_FILE=$(ls reports/allure-report-*.zip | head -1)" >> $GITHUB_OUTPUT
 
+      - name: Deploy Allure Report to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./reports/allure-report
+          publish_branch: gh-pages
+
       - name: Upload Allure Report as Artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -75,7 +83,7 @@ jobs:
           name: allure-report
           path: reports/allure-report/
 
-      - name: Send Email with Allure Report
+      - name: Send Email with Allure Link
         if: always()
         uses: dawidd6/action-send-mail@v3
         with:
@@ -83,22 +91,25 @@ jobs:
           server_port: 587
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: "[Playwright TNC] Test Report - ${{ github.run_number }} - ${{ job.status }}"
+          subject: "🚀 [Playwright TNC] Test Report - #${{ github.run_number }} - ${{ job.status }}"
           body: |
-            Xin chào Vinh,
+            Chào Vinh, 
 
-            Đây là kết quả chạy tự động test Playwright TNC ngày $(date '+%d/%m/%Y %H:%M') (Giờ VN).
+            Kết quả chạy kiểm thử tự động hệ thống Playwright TNC:
 
             📊 Trạng thái: ${{ job.status }}
-            🔗 Chi tiết: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            🕒 Thời gian: $(date '+%d/%m/%Y %H:%M') (Giờ VN)
+            
+            🌐 XEM BÁO CÁO TRỰC TUYẾN (Cực xịn):
+            https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
 
-            File báo cáo Allure được đính kèm trong email này.
+            🔗 Chi tiết GitHub Run:
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
-            ----
-            Playwright TNC - Automated CI/CD
+            ---
+            Bản tin tự động từ Playwright TNC CI/CD.
           to: gamingts2019@gmail.com
           from: ${{ secrets.EMAIL_USERNAME }}
-          attachments: ${{ steps.find-zip.outputs.ZIP_FILE }}
 
 
   # ─── JOB 2: Regression (chạy khi push/PR lên main/master) ───────────────────
