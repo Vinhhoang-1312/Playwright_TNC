@@ -7,13 +7,20 @@ on:
     # 12h trưa VN = 5h UTC
     - cron: '0 2 * * *'
     - cron: '0 5 * * *'
+  # Chạy Regression khi có push hoặc PR vào main/master
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
   # Cũng có thể chạy thủ công từ GitHub UI
   workflow_dispatch:
 
 jobs:
+  # ─── JOB 1: Full test suite (chạy theo lịch 9h & 12h, gửi email) ────────────
   test:
-    name: Run Playwright Tests & Send Report
+    name: "[Scheduled] Full Test Suite + Email Report"
     runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
 
     steps:
       - name: Checkout code
@@ -35,7 +42,7 @@ jobs:
         run: npm install -g allure-commandline
 
       - name: Run Playwright Tests
-        run: npx playwright test
+        run: npx playwright test tests/web
         continue-on-error: true
         env:
           BASE_URL: https://www.saucedemo.com
@@ -80,10 +87,45 @@ jobs:
             📊 Trạng thái: ${{ job.status }}
             🔗 Chi tiết: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
-            File báo cáo Allure được đính kèm trong email này. Mở file ZIP và truy cập index.html để xem báo cáo chi tiết có screenshot.
+            File báo cáo Allure được đính kèm trong email này.
 
             ----
             Playwright TNC - Automated CI/CD
           to: tranphanvinhhoang7@gmail.com
           from: ${{ secrets.EMAIL_USERNAME }}
           attachments: ${{ steps.find-zip.outputs.ZIP_FILE }}
+
+  # ─── JOB 2: Regression (chạy khi push/PR lên main/master) ───────────────────
+  regression:
+    name: "[Regression] Core Smoke Tests"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium browser
+        run: npx playwright install chromium --with-deps
+
+      - name: Run Regression Tests
+        run: npx playwright test tests/regression --reporter=list
+        env:
+          BASE_URL: https://www.saucedemo.com
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-results
+          path: reports/allure-results/
+
