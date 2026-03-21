@@ -3,8 +3,8 @@ name: Playwright Tests - Scheduled CI
 on:
   schedule:
     # Giờ VN = UTC+7 → trừ 7h để được UTC
-    # 8h35 sáng VN = 1h35 UTC  (dùng để test CI)
-    - cron: '35 1 * * *'
+    # 8h50 sáng VN = 1h50 UTC  (dùng để test CI ngay bây giờ)
+    - cron: '50 1 * * *'
     # 9h sáng VN = 2h00 UTC
     - cron: '0 2 * * *'
     # 12h trưa VN = 5h00 UTC
