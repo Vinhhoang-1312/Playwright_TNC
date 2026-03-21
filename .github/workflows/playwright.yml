@@ -134,7 +134,7 @@ jobs:
 
             Thông tin chi tiết:
             --------------------------------------------------
-            - Trạng thái: ${{ job.status }}
+            - Kết quả: Hoàn tất
             - Thời gian thực hiện: ${{ steps.time.outputs.NOW }} (Giờ VN)
             - Mã lượt chạy: #${{ github.run_number }}
             --------------------------------------------------
