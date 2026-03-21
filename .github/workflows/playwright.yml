@@ -113,6 +113,11 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "> Lưu ý: Nếu báo cáo chưa hiện ra ngay, hãy đợi 1-2 phút để GitHub Pages cập nhật." >> $GITHUB_STEP_SUMMARY
 
+      - name: Get Current Timestamp
+        if: always()
+        id: time
+        run: echo "NOW=$(date +'%d/%m/%Y %H:%M')" >> $GITHUB_OUTPUT
+
       - name: Send Email with Allure Link
         if: always()
         uses: dawidd6/action-send-mail@v4
@@ -121,25 +126,28 @@ jobs:
           server_port: 587
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: "🚀 [Playwright TNC] Test Report - #${{ github.run_number }} - ${{ job.status }}"
+          subject: "Report: Automated Test Results - Run #${{ github.run_number }}"
           body: |
-            Chào Vinh, 
+            Báo cáo kết quả kiểm thử tự động hệ thống Playwright TNC.
 
-            Kết quả chạy kiểm thử tự động hệ thống Playwright TNC:
+            Thông tin chi tiết:
+            --------------------------------------------------
+            - Trạng thái: ${{ job.status == 'success' ? 'Hoàn thành (Thành công)' : 'Cảnh báo (Thất bại)' }}
+            - Thời gian thực hiện: ${{ steps.time.outputs.NOW }} (Giờ VN)
+            - Mã lượt chạy: #${{ github.run_number }}
+            --------------------------------------------------
 
-            📊 Trạng thái: ${{ job.status }}
-            🕒 Thời gian: $(date '+%d/%m/%Y %H:%M') (Giờ VN)
-            
-            🌐 XEM BÁO CÁO TRỰC TUYẾN (Cực xịn):
+            Truy cập báo cáo trực tuyến (Allure Dashboard):
             https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
 
-            🔗 Chi tiết GitHub Run:
+            Chi tiết kỹ thuật trên GitHub Actions:
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
-            ---
-            Bản tin tự động từ Playwright TNC CI/CD.
+            Trân trọng,
+            Hệ thống CI/CD Playwright TNC
           to: gamingts2019@gmail.com
           from: ${{ secrets.EMAIL_USERNAME }}
+
 
 
   # ─── JOB 2: Regression (chạy khi push/PR lên main/master) ───────────────────
