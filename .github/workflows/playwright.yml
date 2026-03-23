@@ -1,188 +1,188 @@
-name: Playwright Tests - Scheduled CI
+# name: Playwright Tests - Scheduled CI
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+# env:
+#   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
-on:
-  schedule:
-    # Giờ VN = UTC+7 → trừ 7h để được UTC
-    # 8h50 sáng VN = 1h50 UTC  (dùng để test CI ngay bây giờ)
-    - cron: '50 1 * * *'
-    # 9h05 sáng VN = 2h05 UTC
-    - cron: '5 2 * * *'
-    # 12h trưa VN = 5h00 UTC
-    - cron: '0 5 * * *'
-  # Chạy Regression khi có push hoặc PR vào main/master
-  push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
-  # Cũng có thể chạy thủ công từ GitHub UI
-  workflow_dispatch:
+# on:
+#   schedule:
+#     # Giờ VN = UTC+7 → trừ 7h để được UTC
+#     # 8h50 sáng VN = 1h50 UTC  (dùng để test CI ngay bây giờ)
+#     - cron: '50 1 * * *'
+#     # 9h05 sáng VN = 2h05 UTC
+#     - cron: '5 2 * * *'
+#     # 12h trưa VN = 5h00 UTC
+#     - cron: '0 5 * * *'
+#   # Chạy Regression khi có push hoặc PR vào main/master
+#   push:
+#     branches: [main, master]
+#   pull_request:
+#     branches: [main, master]
+#   # Cũng có thể chạy thủ công từ GitHub UI
+#   workflow_dispatch:
 
-jobs:
-  # ─── JOB 1: Scheduled/Manual Run ───────────────────────────────────────
-  scheduled:
-    name: "[Scheduled] Full Test Suite + Email Report"
-    runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    permissions:
-      contents: write
+# jobs:
+#   # ─── JOB 1: Scheduled/Manual Run ───────────────────────────────────────
+#   scheduled:
+#     name: "[Scheduled] Full Test Suite + Email Report"
+#     runs-on: ubuntu-latest
+#     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+#     permissions:
+#       contents: write
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: '18'
+#           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+#       - name: Install dependencies
+#         run: npm ci
 
-      - name: Install Playwright Chromium browser
-        run: npx playwright install chromium --with-deps
+#       - name: Install Playwright Chromium browser
+#         run: npx playwright install chromium --with-deps
 
-      - name: Install Allure CLI
-        run: npm install -g allure-commandline
+#       - name: Install Allure CLI
+#         run: npm install -g allure-commandline
 
-      - name: Run Playwright Tests
-        run: npx playwright test tests/web
-        continue-on-error: true
-        env:
-          BASE_URL: https://www.saucedemo.com
+#       - name: Run Playwright Tests
+#         run: npx playwright test tests/web
+#         continue-on-error: true
+#         env:
+#           BASE_URL: https://www.saucedemo.com
 
-      - name: Generate Allure Environment and Executor Info
-        if: always()
-        run: |
-          mkdir -p reports/allure-results
-          echo "Browser=Chromium" > reports/allure-results/environment.properties
-          echo "Environment=Production" >> reports/allure-results/environment.properties
-          echo "Operating System=Ubuntu (GitHub Actions)" >> reports/allure-results/environment.properties
-          echo "Base URL=https://www.saucedemo.com" >> reports/allure-results/environment.properties
+#       - name: Generate Allure Environment and Executor Info
+#         if: always()
+#         run: |
+#           mkdir -p reports/allure-results
+#           echo "Browser=Chromium" > reports/allure-results/environment.properties
+#           echo "Environment=Production" >> reports/allure-results/environment.properties
+#           echo "Operating System=Ubuntu (GitHub Actions)" >> reports/allure-results/environment.properties
+#           echo "Base URL=https://www.saucedemo.com" >> reports/allure-results/environment.properties
           
-          echo '{
-            "name": "GitHub Actions",
-            "type": "github",
-            "reportName": "Playwright TNC Report",
-            "url": "${{ github.server_url }}/${{ github.repository }}",
-            "buildOrder": ${{ github.run_number }},
-            "buildName": "Run #${{ github.run_number }}",
-            "buildUrl": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          }' > reports/allure-results/executor.json
+#           echo '{
+#             "name": "GitHub Actions",
+#             "type": "github",
+#             "reportName": "Playwright TNC Report",
+#             "url": "${{ github.server_url }}/${{ github.repository }}",
+#             "buildOrder": ${{ github.run_number }},
+#             "buildName": "Run #${{ github.run_number }}",
+#             "buildUrl": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+#           }' > reports/allure-results/executor.json
 
-      - name: Generate Allure Report
-        if: always()
-        run: |
-          allure generate reports/allure-results --clean -o reports/allure-report
-          touch reports/allure-report/.nojekyll
+#       - name: Generate Allure Report
+#         if: always()
+#         run: |
+#           allure generate reports/allure-results --clean -o reports/allure-report
+#           touch reports/allure-report/.nojekyll
 
-      - name: Zip Allure Report
-        if: always()
-        run: |
-          cd reports
-          zip -r allure-report-$(date +%Y%m%d_%H%M).zip allure-report/
+#       - name: Zip Allure Report
+#         if: always()
+#         run: |
+#           cd reports
+#           zip -r allure-report-$(date +%Y%m%d_%H%M).zip allure-report/
 
-      - name: Find zipped report
-        if: always()
-        id: find-zip
-        run: echo "ZIP_FILE=$(ls reports/allure-report-*.zip | head -1)" >> $GITHUB_OUTPUT
+#       - name: Find zipped report
+#         if: always()
+#         id: find-zip
+#         run: echo "ZIP_FILE=$(ls reports/allure-report-*.zip | head -1)" >> $GITHUB_OUTPUT
 
-      - name: Deploy Allure Report to GitHub Pages
-        if: always()
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./reports/allure-report
-          publish_branch: gh-pages
+#       - name: Deploy Allure Report to GitHub Pages
+#         if: always()
+#         uses: peaceiris/actions-gh-pages@v4
+#         with:
+#           github_token: ${{ secrets.GITHUB_TOKEN }}
+#           publish_dir: ./reports/allure-report
+#           publish_branch: gh-pages
 
-      - name: Upload Allure Report as Artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: allure-report
-          path: reports/allure-report/
+#       - name: Upload Allure Report as Artifact
+#         if: always()
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: allure-report
+#           path: reports/allure-report/
 
-      - name: Add Job Summary
-        if: always()
-        run: |
-          echo "## 📊 Allure Test Report" >> $GITHUB_STEP_SUMMARY
-          echo "Báo cáo đã sẵn sàng! Bạn có thể xem trực tiếp tại đường dẫn dưới đây:" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "🚀 **[XEM BÁO CÁO TRỰC TUYẾN TẠI ĐÂY](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/)**" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "> Lưu ý: Nếu báo cáo chưa hiện ra ngay, hãy đợi 1-2 phút để GitHub Pages cập nhật." >> $GITHUB_STEP_SUMMARY
+#       - name: Add Job Summary
+#         if: always()
+#         run: |
+#           echo "## 📊 Allure Test Report" >> $GITHUB_STEP_SUMMARY
+#           echo "Báo cáo đã sẵn sàng! Bạn có thể xem trực tiếp tại đường dẫn dưới đây:" >> $GITHUB_STEP_SUMMARY
+#           echo "" >> $GITHUB_STEP_SUMMARY
+#           echo "🚀 **[XEM BÁO CÁO TRỰC TUYẾN TẠI ĐÂY](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/)**" >> $GITHUB_STEP_SUMMARY
+#           echo "" >> $GITHUB_STEP_SUMMARY
+#           echo "> Lưu ý: Nếu báo cáo chưa hiện ra ngay, hãy đợi 1-2 phút để GitHub Pages cập nhật." >> $GITHUB_STEP_SUMMARY
 
-      - name: Get Current Timestamp
-        if: always()
-        id: time
-        run: echo "NOW=$(date +'%d/%m/%Y %H:%M')" >> $GITHUB_OUTPUT
+#       - name: Get Current Timestamp
+#         if: always()
+#         id: time
+#         run: echo "NOW=$(date +'%d/%m/%Y %H:%M')" >> $GITHUB_OUTPUT
 
-      - name: Send Email with Allure Link
-        if: always()
-        uses: dawidd6/action-send-mail@v4
-        with:
-          server_address: smtp.gmail.com
-          server_port: 587
-          username: ${{ secrets.EMAIL_USERNAME }}
-          password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: "Report: Automated Test Results - Run #${{ github.run_number }}"
-          body: |
-            Báo cáo kết quả kiểm thử tự động hệ thống Playwright TNC.
+#       - name: Send Email with Allure Link
+#         if: always()
+#         uses: dawidd6/action-send-mail@v4
+#         with:
+#           server_address: smtp.gmail.com
+#           server_port: 587
+#           username: ${{ secrets.EMAIL_USERNAME }}
+#           password: ${{ secrets.EMAIL_PASSWORD }}
+#           subject: "Report: Automated Test Results - Run #${{ github.run_number }}"
+#           body: |
+#             Báo cáo kết quả kiểm thử tự động hệ thống Playwright TNC.
 
-            Thông tin chi tiết:
-            --------------------------------------------------
-            - Kết quả: Hoàn tất
-            - Thời gian thực hiện: ${{ steps.time.outputs.NOW }} (Giờ VN)
-            - Mã lượt chạy: #${{ github.run_number }}
-            --------------------------------------------------
+#             Thông tin chi tiết:
+#             --------------------------------------------------
+#             - Kết quả: Hoàn tất
+#             - Thời gian thực hiện: ${{ steps.time.outputs.NOW }} (Giờ VN)
+#             - Mã lượt chạy: #${{ github.run_number }}
+#             --------------------------------------------------
 
-            Truy cập báo cáo trực tuyến (Allure Dashboard):
-            https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+#             Truy cập báo cáo trực tuyến (Allure Dashboard):
+#             https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
 
-            Chi tiết kỹ thuật trên GitHub Actions:
-            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+#             Chi tiết kỹ thuật trên GitHub Actions:
+#             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
-            Trân trọng,
-            Hệ thống CI/CD Playwright TNC
-          to: gamingts2019@gmail.com
-          from: ${{ secrets.EMAIL_USERNAME }}
+#             Trân trọng,
+#             Hệ thống CI/CD Playwright TNC
+#           to: gamingts2019@gmail.com
+#           from: ${{ secrets.EMAIL_USERNAME }}
 
 
 
-  # ─── JOB 2: Regression (chạy khi push/PR lên main/master) ───────────────────
-  regression:
-    name: "[Regression] Core Smoke Tests"
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'pull_request'
+#   # ─── JOB 2: Regression (chạy khi push/PR lên main/master) ───────────────────
+#   regression:
+#     name: "[Regression] Core Smoke Tests"
+#     runs-on: ubuntu-latest
+#     if: github.event_name == 'push' || github.event_name == 'pull_request'
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: '18'
+#           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+#       - name: Install dependencies
+#         run: npm ci
 
-      - name: Install Playwright Chromium browser
-        run: npx playwright install chromium --with-deps
+#       - name: Install Playwright Chromium browser
+#         run: npx playwright install chromium --with-deps
 
-      - name: Run Regression Tests
-        run: npx playwright test tests/regression
-        env:
-          BASE_URL: https://www.saucedemo.com
+#       - name: Run Regression Tests
+#         run: npx playwright test tests/regression
+#         env:
+#           BASE_URL: https://www.saucedemo.com
 
-      - name: Upload Test Results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: regression-results
-          path: reports/allure-results/
+#       - name: Upload Test Results
+#         if: always()
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: regression-results
+#           path: reports/allure-results/
 
